@@ -1,0 +1,89 @@
+---
+- name: Stop all Docker Containers (Smart Reset)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    project_root: "{{ playbook_dir }}/.."
+    sql_file_path: "{{ project_root }}/Apache/www/assets/db/iec_platform.sql"
+    hash_file_path: "{{ project_root }}/.sql_hash"
+
+  tasks:
+    # 1. Calculate the Checksum of the current SQL file
+    - name: Get checksum of SQL file
+      ansible.builtin.stat:
+        path: "{{ sql_file_path }}"
+        checksum_algorithm: md5
+      register: sql_stat
+
+    # 2. Check if the .sql_hash file exists
+    - name: Check if hash file exists
+      ansible.builtin.stat:
+        path: "{{ hash_file_path }}"
+      register: hash_file_stat
+
+    # 3. Read the old hash (if it exists)
+    - name: Read stored hash
+      ansible.builtin.slurp:
+        src: "{{ hash_file_path }}"
+      register: stored_hash_encoded
+      when: hash_file_stat.stat.exists
+
+    # 4. Determine if we need to reset the DB volume
+    - name: Determine if DB reset is needed
+      ansible.builtin.set_fact:
+        reset_db: >-
+          {{
+            not hash_file_stat.stat.exists or
+            (stored_hash_encoded['content'] | b64decode | trim) != sql_stat.stat.checksum
+          }}
+
+    # 5. Notify user of the decision
+    - name: Announce Decision
+      ansible.builtin.debug:
+        msg: "{{ '⚠️ SQL changed! Wiping Database Volume.' if reset_db else '✅ SQL unchanged. Preserving Data.' }}"
+
+    # 6. Stop Web Server
+    - name: Stop Web Server
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/Apache"
+        files:
+          - docker-compose.web.yml
+        state: absent
+
+    # 7. Stop DNS Server
+    - name: Stop DNS Server
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/bind"
+        files:
+          - docker-compose.bind.yml
+        state: absent
+
+    # 8. Stop Nagios
+    - name: Stop Nagios
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/nagios"
+        files:
+          - docker-compose.yml
+        state: absent
+
+    # 9. Stop Database (Conditionally Remove Volume)
+    - name: Stop Database
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/mariadb"
+        files:
+          - docker-compose.db.yml
+        state: absent
+        remove_volumes: "{{ reset_db }}"
+
+    # 10. Update the Hash File (if we reset)
+    - name: Update Hash File
+      ansible.builtin.copy:
+        content: "{{ sql_stat.stat.checksum }}"
+        dest: "{{ hash_file_path }}"
+        mode: '0644'
+      when: reset_db
+
+    - name: Final Status
+      ansible.builtin.debug:
+        msg: "🛑 All containers stopped."

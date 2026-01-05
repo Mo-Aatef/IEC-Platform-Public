@@ -1,0 +1,13 @@
+services:
+  nagios:
+    image: jasonrivers/nagios
+    container_name: nagios_container
+    ports:
+      - "8081:80"
+      - "5666:5666"
+    networks:
+      - csn_net
+
+networks:
+  csn_net:
+    external: true

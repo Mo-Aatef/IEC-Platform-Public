@@ -1,0 +1,619 @@
+/* assets/css/student/view-lesson.css */
+
+/* --- LAYOUT --- */
+body {
+  background-color: #f8fafc;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #1e293b;
+}
+
+.wizard-container {
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HEADER --- */
+.wizard-header {
+  background: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  position: relative;
+  top: 0;
+  z-index: 100;
+}
+
+.back-link {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+.back-link:hover {
+  color: #0f172a;
+}
+
+.lesson-info {
+  text-align: center;
+}
+.l-day {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.l-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.progress-badge {
+  background: #f1f5f9;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+/* --- STEPPER (Compact & Centered) --- */
+.stepper-wrapper {
+  padding: 40px 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center; /* Crucial for centering */
+}
+
+.stepper-track {
+  display: flex;
+  align-items: center; /* Vertically center lines with dots */
+  justify-content: center;
+  position: relative;
+  gap: 15px;
+  /* Remove fixed width so it shrinks to fit content */
+}
+
+/* The Step Container */
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+  cursor: pointer;
+  position: relative;
+  width: 80px; /* Controls spacing between dots */
+}
+
+/* The Circle */
+.step-dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  background-clip: padding-box;
+}
+
+/* The Label */
+.step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  white-space: nowrap; /* Prevents text wrapping */
+}
+
+/* ACTIVE STATE */
+.step-item.active .step-dot {
+  border-color: #4f46e5;
+  background: #4f46e5; /* Solid Blue fill like screenshot */
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+.step-item.active .step-label {
+  color: #4f46e5;
+}
+
+/* The Connector Line */
+.step-line {
+  height: 3px;
+  background: #e2e8f0;
+  flex-grow: 1;
+  min-width: 50px; /* Minimum length of line */
+  margin: 0 -10px; /* Pull dots closer to cover line ends */
+  position: relative;
+  top: -14px; /* Align with center of dots (label height offset) */
+  z-index: 1;
+}
+
+/* Active Line */
+.step-line.filled {
+  background: #4f46e5;
+}
+
+/* --- CONTENT CARDS --- */
+.wizard-content {
+  flex-grow: 1;
+  padding: 32px 0;
+  margin: 0 auto;
+  width: 100%;
+}
+.step-section {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+.step-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.header-warmup {
+  background: #ecfdf5;
+  color: #047857;
+}
+.header-watch {
+  background: #eef2ff;
+  color: #4338ca;
+}
+.header-practice {
+  background: #fff7ed;
+  color: #c2410c;
+}
+.header-speak {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+.card-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-body {
+  padding: 40px;
+}
+.card-footer {
+  padding: 24px 40px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- VIDEO & MEDIA STYLING --- */
+
+/* 1. Make the video container 16:9 and full width */
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #000;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+/* 2. Force the iframe to fill that container */
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 3. Style for Reading/Text content to match prominence */
+.reading-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 32px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #334155;
+}
+
+/* --- QUIZ STYLING (VERTICAL) --- */
+.quiz-question { margin-bottom: 32px; }
+.q-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 16px; display: block; }
+
+/* This class handles the vertical stacking */
+.q-option {
+    display: flex;
+    align-items: center;
+    width: 100%;           /* Forces full width -> Stacks vertically */
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 12px;   /* Gap between options */
+    cursor: pointer;
+    background: #ffffff;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.q-option:hover {
+    border-color: #4f46e5;
+    background: #f8fafc;
+}
+
+.q-option input {
+    margin-right: 12px;
+    width: 18px; height: 18px;
+    accent-color: #4f46e5;
+}
+
+.q-option span { font-size: 15px; color: #475569; }
+
+/* BUTTONS */
+.btn-primary {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.btn-primary:hover {
+  background: #4338ca;
+}
+
+.btn-secondary {
+  background: white;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* ... existing styles ... */
+
+/* =========================================
+   TUTOR PREVIEW MODE ADDITIONS
+   ========================================= */
+
+/* The Sticky Banner */
+.tutor-preview-banner {
+    background-color: #1e293b; /* Professional Dark Slate */
+    color: #f8fafc;            /* White Text */
+    padding: 10px 48px;
+    font-size: 13px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+/* Correct Answer Highlight (X-Ray Vision) */
+.q-option.tutor-correct-answer {
+    border: 2px solid #10b981; /* Green Border */
+    background-color: #ecfdf5; /* Light Green BG */
+}
+
+.tutor-key-badge {
+    margin-left: auto; /* Push to right */
+    background: #10b981;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* =========================================
+   TUTOR SCROLL VIEW (Vertical Layout)
+   ========================================= */
+
+/* 1. Show all steps stacked vertically */
+body.tutor-scroll-view .step-section {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    margin-bottom: 40px; /* Space between cards */
+}
+
+/* 2. Hide Navigation Controls (Stepper, Buttons, Counters) */
+body.tutor-scroll-view .stepper-wrapper,
+body.tutor-scroll-view .progress-badge,
+body.tutor-scroll-view .card-footer {
+    display: none !important;
+}
+
+/* 3. Adjust Layout Spacing */
+body.tutor-scroll-view .wizard-content {
+    padding-top: 20px;
+    padding-bottom: 60px;
+}
+
+/* 4. Add a Label to each card so Tutor knows which step it is */
+body.tutor-scroll-view .content-card {
+    position: relative;
+    border-top: 4px solid #cbd5e1; /* Visual separator */
+}
+
+body.tutor-scroll-view .content-card::before {
+    content: var(--step-index); /* Uses the inline style we just added */
+    position: absolute;
+    top: -25px;
+    left: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- RESPONSIVENESS (Tablet & Mobile tiers) --- */
+
+/* TIER 1: Tablet / Small Desktop (max-width: 992px) */
+@media (max-width: 900px) {
+  .wizard-container {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  /* Compact Header but keep labels */
+  .wizard-header {
+    padding: 16px 20px;
+  }
+  
+  .back-link {
+    font-size: 13px;
+  }
+  
+  /* Slightly more compact stepper */
+  .stepper-wrapper {
+    padding: 24px 0;
+  }
+  .step-item {
+    width: 70px;
+  }
+  .step-dot {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+  .step-label {
+    font-size: 12px;
+  }
+  
+  /* Content adjustments */
+  .wizard-content {
+    padding: 24px 0px;
+  }
+  .card-body, .card-header, .card-footer {
+    padding: 24px;
+  }
+}
+
+/* TIER 2: Mobile / Small Devices (max-width: 576px) */
+@media (max-width: 500px) {
+  /* 1. LAYOUT: Remove rigid margins */
+  .wizard-container {
+    width: 100%;
+    min-height: auto;
+  }
+
+  /* 2. HEADER: Compact Layout */
+  .wizard-header {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  
+  .back-link span {
+    display: none; /* Hide text, keep icon for space */
+  }
+  .back-link i {
+    font-size: 16px;
+    padding: 8px;
+    background: #f1f5f9;
+    border-radius: 8px;
+  }
+
+  .lesson-info .l-day {
+    font-size: 10px;
+  }
+  .lesson-info .l-title {
+    font-size: 14px;
+  }
+
+  /* 3. STEPPER: Simple Compact Design (Drawer-like efficiency) */
+  .stepper-wrapper {
+    padding: 16px 0;
+  }
+  
+  .stepper-track {
+    gap: 4px; /* Tighten gap */
+    padding: 0 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .step-label {
+    display: none; /* Hide text labels on mobile */
+  }
+
+  .step-item {
+    width: auto; /* Allow auto width */
+    flex: 0 0 auto;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    font-size: 12px; /* Smaller font for number inside dot */
+    border-width: 2px;
+  }
+
+  .step-line {
+    min-width: 10px;
+    margin: 0; 
+    top: 0; 
+    height: 2px;
+    border-radius: 2px;
+    align-self: center;
+  }
+
+  /* 4. CONTENT CARDS: Mobile Optimized */
+  .wizard-content {
+    padding: 16px 0; /* Remove side padding to maximize card width */
+  }
+
+  .content-card {
+    border-radius: 0; /* Full width card on mobile, no rounded corners */
+    border-left: none;
+    border-right: none;
+    box-shadow: none; 
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .card-header {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .icon-box {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+  
+  .card-header h2 {
+    font-size: 15px; /* Adjust header text size */
+  }
+
+  .card-body {
+    padding: 16px;
+    font-size: 14px; /* Global reduction for body text */
+  }
+
+  /* 5. FOOTER: Stacked Actions (Primary Top) */
+  .card-footer {
+    padding: 16px;
+    flex-direction: column-reverse; 
+    gap: 12px;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%; 
+    justify-content: center;
+    padding: 12px; 
+    font-size: 14px;
+  }
+
+  /* 6. Quiz & Media */
+  .video-wrapper {
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  
+  .reading-box {
+    padding: 16px;
+    font-size: 14px; /* Adjusted text size */
+    line-height: 1.6;
+  }
+
+  .q-option {
+    padding: 12px;
+    flex-direction: row; 
+    align-items: flex-start; 
+  }
+  
+  .q-option input {
+    margin-top: 3px; 
+  }
+  
+  .q-option span {
+    font-size: 14px; /* Smaller quiz text */
+  }
+  
+  .q-title {
+    font-size: 15px;
+  }
+}

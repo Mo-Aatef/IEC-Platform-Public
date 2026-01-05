@@ -1,0 +1,20 @@
+services:
+  web:
+    build: ./www
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./www:/var/www/html
+    environment:
+      DB_HOST: dbserver
+      DB_NAME: iec_platform
+      DB_USER: appuser
+      DB_PASSWORD: secret123
+    networks:
+      - csn_net
+
+networks:
+  csn_net:
+    external: true

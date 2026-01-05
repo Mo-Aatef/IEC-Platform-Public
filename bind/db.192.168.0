@@ -1,0 +1,12 @@
+$TTL    604800
+@       IN      SOA     ns.iec.test. admin.iec.test. (
+                              1         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns.iec.test.
+
+; Reverse lookup for localhost
+1       IN      PTR     iec.test.

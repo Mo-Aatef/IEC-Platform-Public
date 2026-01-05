@@ -1,0 +1,64 @@
+---
+- name:  Start all Docker Containers (Smart Deployment)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    # This points to the parent directory (IEC-platform/)
+    project_root: "{{ playbook_dir }}/.."
+
+  tasks:
+    # 1. Equivalent to: docker network create csn_net
+    - name: Create shared network 'csn_net'
+      community.docker.docker_network:
+        name: csn_net
+        state: present
+
+    # 2. Start Database (MariaDB + phpMyAdmin)
+    - name: Start Database Server
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/mariadb"
+        files:
+          - docker-compose.db.yml
+        state: present
+        recreate: never
+      register: db_status
+
+    # 3. Optional: Wait only if DB was just started (Smart Waiting)
+    - name: Wait for Database to initialize
+      ansible.builtin.pause:
+        seconds: 5
+      when: db_status.changed
+
+    # 4. Start Web Server (Apache)
+    - name: Start Web Server
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/Apache"
+        files:
+          - docker-compose.web.yml
+        state: present
+
+    # 5. Start DNS Server (BIND)
+    - name: Start DNS Server
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/bind"
+        files:
+          - docker-compose.bind.yml
+        state: present
+
+    # 6. Start Nagios
+    - name: Start Nagios Monitoring
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}/nagios"
+        files:
+          - docker-compose.yml
+        state: present
+
+    # 7. Print Status (The "Success" Message)
+    - name: Display Access Info
+      ansible.builtin.debug:
+        msg:
+          - "✅ All containers are running!"
+          - "Web App: http://localhost:8080"
+          - "phpMyAdmin: http://localhost:8082"
+          - "Nagios: http://localhost:8081"

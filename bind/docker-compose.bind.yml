@@ -1,0 +1,29 @@
+services:
+  dns-server:
+    image: ubuntu/bind9:latest
+    container_name: dns-server
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ./named.conf:/etc/bind/named.conf
+      - ./db.iec.test:/etc/bind/db.iec.test
+      - ./db.192.168.0:/etc/bind/db.192.168.0
+      - bind_cache:/var/cache/bind
+    environment:
+      - TZ=UTC
+    networks:
+      - csn_net
+    healthcheck:
+      test: ["CMD", "dig", "@127.0.0.1", "iec.test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  bind_cache:
+
+networks:
+  csn_net:
+    external: true

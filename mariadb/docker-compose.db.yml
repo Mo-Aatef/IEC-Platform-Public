@@ -1,0 +1,34 @@
+services:
+  dbserver:
+    image: mariadb:11
+    container_name: dbserver
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: iec_platform
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: secret123
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../Apache/www/assets/db/iec_platform.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - csn_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: dbserver
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8082:80"
+    networks:
+      - csn_net
+
+volumes:
+  db_data:
+
+networks:
+  csn_net:
+    external: true

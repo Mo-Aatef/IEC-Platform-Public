@@ -1,0 +1,379 @@
+/* assets/css/landing.css */
+
+/* --- GLOBAL SETTINGS --- */
+body {
+    font-family: 'Inter', sans-serif;
+    color: #4b5563;
+    overflow-x: hidden; /* CRITICAL: Prevents horizontal scroll on mobile */
+}
+
+/* Custom Colors */
+:root {
+    --primary-blue: #2563eb;
+    --primary-dark: #1d4ed8;
+    --soft-bg: #f9fafb;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    min-height: 82px;
+    padding: 10px 0;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #4b5563 !important;
+    margin-right: 20px;
+}
+.nav-link:hover {
+    color: var(--primary-blue) !important;
+}
+
+/* LOGO FIX: Added margin and flex-shrink to prevent tablet squishing */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Adds consistent space between box and text */
+}
+
+.logo-box {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-blue);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    
+    /* CRITICAL: Prevents logo from shrinking on tablet */
+    flex-shrink: 0; 
+}
+
+/* --- HERO SECTION --- */
+.hero-section {
+    background: linear-gradient(to bottom, #eff6ff 0%, #ffffff 100%);
+    padding: 120px 0 85px 0; /* Top padding clears fixed navbar */
+}
+
+.hero-badge {
+    background: #dbeafe;
+    color: #2563eb;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+}
+
+.hero-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    color: #6b7280;
+}
+
+/* --- CUSTOM BUTTONS --- */
+.btn-custom-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    font-weight: 600;
+    padding: 16px 32px;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-custom-primary:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-dark);
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+.btn-custom-outline {
+    background-color: white;
+    color: var(--primary-blue);
+    font-weight: 600;
+    padding: 16px 32px;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb; /* Subtle border initially */
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-custom-outline:hover {
+    background-color: #f8fafc;
+    border-color: var(--primary-blue);
+    color: var(--primary-dark);
+}
+
+/* --- ICON BOXES --- */
+.icon-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+.bg-blue-light { background: #dbeafe; color: #2563eb; }
+.bg-green-light { background: #dcfce7; color: #16a34a; }
+.bg-purple-light { background: #f3e8ff; color: #9333ea; }
+.bg-orange-light { background: #ffedd5; color: #ea580c; }
+
+/* --- STEPS CARD (Blue) --- */
+.steps-card {
+    background: var(--primary-blue);
+    color: white;
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circle behind steps */
+.steps-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.step-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 30px;
+}
+.step-number {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+}
+.step-line {
+    position: absolute;
+    left: 17.5px; /* Center with the 36px circle */
+    top: 36px;
+    width: 1px;
+    height: calc(100% + 10px); /* Extend to next step */
+    background: rgba(255,255,255,0.3);
+}
+
+/* --- FEATURE CARDS --- */
+.feature-card {
+    background: white;
+    padding: 32px;
+    border-radius: 20px;
+    height: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s;
+    border: 1px solid #f3f4f6;
+}
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+    border-color: #e5e7eb;
+}
+
+/* --- FOOTER & CTA --- */
+.cta-section {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    padding: 100px 0;
+}
+footer {
+    background: #111827; /* Gray 900 */
+    color: #9ca3af;       /* Gray 400 */
+    padding: 80px 0 40px 0;
+}
+footer h5 {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+}
+footer a {
+    color: #9ca3af;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 14px;
+    transition: color 0.2s;
+}
+footer a:hover {
+    color: white;
+}
+
+/* =========================================
+   RESPONSIVE MEDIA QUERIES (Symmetry Fixes)
+   ========================================= */
+
+/* 1. TABLET (Max Width: 991px) */
+@media (max-width: 991px) {
+    .navbar-toggler {
+        border: none;
+        padding: 0;
+        color: #111827;
+    }
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+
+    /* Center Hero content on tablet/mobile */
+    .hero-section {
+        text-align: center; 
+        padding-top: 100px;
+    }
+    
+    .hero-title {
+        font-size: 2.75rem;
+    }
+    
+    /* Center the buttons group */
+    .hero-btns-container {
+        justify-content: center;
+    }
+    
+    /* Center the stats row */
+    .hero-stats-row {
+        justify-content: center;
+    }
+    
+    /* Stack the About section image/text */
+    .about-text-col {
+        margin-bottom: 40px;
+    }
+    
+    /* Center Footer */
+    footer {
+        text-align: center;
+    }
+    
+    /* Center social icons in footer */
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* 2. MOBILE PHONE (Max Width: 576px) */
+@media (max-width: 576px) {
+    
+    /* Increase side padding for container to prevent edge-touching */
+    .container {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    /* Navbar Height Adjust */
+    .navbar {
+        min-height: 70px;
+        padding: 12px 0;
+    }
+
+    /* HERO SYMMETRY */
+    .hero-title {
+        font-size: 2.25rem; /* Manageable size */
+        line-height: 1.2;
+    }
+    
+    .hero-text {
+        font-size: 1.1rem;
+    }
+
+    /* Full Width Buttons */
+    .btn-custom-primary, 
+    .btn-custom-outline {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 14px 20px;
+    }
+
+    /* Wrap Stats nicely */
+    .hero-stats-row {
+        flex-wrap: wrap;
+        gap: 16px !important;
+        justify-content: center;
+    }
+    .hero-stats-row > div {
+        /* Make stats pill-shaped for better visual organization on mobile */
+        background: #f3f4f6;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    /* ABOUT SECTION SYMMETRY */
+    .icon-box {
+        margin-right: 16px;
+        width: 56px;
+        height: 56px;
+        font-size: 1.25rem;
+    }
+    
+    .d-flex.mb-4 {
+        /* Align icon and text properly */
+        align-items: flex-start;
+        text-align: left; /* Keep left alignment for readability within blocks */
+    }
+
+    /* STEPS CARD */
+    .steps-card {
+        padding: 32px 24px;
+        border-radius: 20px;
+        text-align: left; /* Keep steps left-aligned for flow */
+    }
+
+    /* FOOTER SYMMETRY */
+    footer .col-lg-4, 
+    footer .col-lg-2, 
+    footer .col-lg-3 {
+        margin-bottom: 32px;
+    }
+    
+    /* Logo in footer */
+    .d-flex.align-items-center.mb-3 {
+        justify-content: center;
+    }
+}

@@ -1,0 +1,61 @@
+# ===========================
+# 1. CRITICAL SECURITY (Secrets)
+# ===========================
+# Database connection details
+Apache/www/app/config.php
+
+# Environment variables (Docker & App)
+.env
+.env.*
+*.env
+
+# SSH Keys & Certs (Just in case)
+*.pem
+*.key
+id_rsa
+
+
+# ===========================
+# 2. DATA & DATABASE SAFETY
+# ===========================
+# Block ALL SQL files to prevent accidental data leaks
+*.sql
+*.sql.gz
+
+# If you want to share the schema specifically, you can force-add 
+# a sanitized "schema.sql" later using "git add -f", but default to block.
+
+# Block Database Runtime Data (Docker volumes)
+mariadb/data/
+mariadb/logs/
+mariadb/*-data/
+
+
+# ===========================
+# 3. DOCKER & INFRASTRUCTURE
+# ===========================
+# Local development overrides
+docker-compose.override.yml
+
+# Runtime logs
+*.log
+nagios/logs/
+bind/logs/
+
+
+# ===========================
+# 4. OS & EDITOR JUNK
+# ===========================
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+
+
+# ===========================
+# 5. BUILD ARTIFACTS
+# ===========================
+.sql_hash

@@ -1,0 +1,277 @@
+/* assets/css/auth.css */
+/* FULLY RESPONSIVE AUTH THEME */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* --- 1. GLOBAL RESET & CENTER PARENT --- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #F3F4F6;
+    /* This centers the card perfectly in the viewport */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- 2. THE CARD CONTAINER (Desktop Default) --- */
+.split-screen {
+    display: flex;
+    width: 900px;           /* Fixed width for desktop */
+    height: 550px;          /* Fixed height for desktop */
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;       /* Keeps child elements inside rounded corners */
+    position: relative;
+}
+
+/* --- 3. LEFT PANEL (Purple Info Area) --- */
+.left-panel {
+    flex: 1;                /* Takes 50% width */
+    background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
+    color: white;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.brand-logo {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.left-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.left-content p {
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.feature-list i {
+    background: rgba(255, 255, 255, 0.2);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- 4. RIGHT PANEL (Form Area) --- */
+.right-panel {
+    flex: 1;                /* Takes 50% width */
+    background: white;
+    display: flex;
+    align-items: center;    /* Vertical Center */
+    justify-content: center;/* Horizontal Center */
+    padding: 40px;
+    width: 100%;            /* Ensure it fills its flex container */
+}
+
+/* The inner box containing inputs */
+.auth-box {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;         /* Force horizontal centering */
+}
+
+.header-text {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.header-text h2 { font-size: 22px; color: #111827; margin: 0 0 4px 0; font-weight: 700; }
+.header-text p { color: #6B7280; font-size: 13px; margin: 0; }
+
+/* --- 5. FORM ELEMENTS --- */
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+
+.input-wrapper { position: relative; }
+.input-wrapper i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF;
+    font-size: 14px;
+}
+.input-wrapper input {
+    width: 100%;
+    padding: 10px 10px 10px 34px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+.input-wrapper input:focus { border-color: #4F46E5; outline: none; }
+
+.forgot-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+.forgot-row a { color: #4F46E5; font-size: 12px; text-decoration: none; font-weight: 600; }
+
+.btn-primary {
+    width: 100%;
+    padding: 10px;
+    background: #4F46E5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-primary:hover { background: #4338ca; }
+
+/* Divider & Socials */
+.divider {
+    text-align: center;
+    margin: 14px 0;
+    position: relative;
+}
+.divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #E5E7EB;
+}
+.divider span {
+    background: white;
+    padding: 0 10px;
+    color: #9CA3AF;
+    font-size: 11px;
+    position: relative;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 8px;
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #374151;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Alerts & Info */
+.alert {
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+.info-box {
+    margin-top: 16px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    font-size: 11px;
+    color: #1E40AF;
+    line-height: 1.4;
+}
+
+/* --- 6. RESPONSIVE BREAKPOINT (950px) --- */
+@media (max-width: 950px) {
+
+    body {
+        /* Allow scroll if screen is very short */
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .split-screen {
+        /* Reset Fixed Dimensions */
+        width: 90%;
+        max-width: 450px;       /* Nice mobile width */
+        height: auto;           /* Let content define height */
+        min-height: auto;
+        
+        /* Layout Reset */
+        flex-direction: column;
+        display: block;         /* Removes flex behavior that might split width */
+        
+        /* Centering */
+        margin: 0 auto;
+    }
+
+    /* Hide the Left Panel completely */
+    .left-panel {
+        display: none !important;
+    }
+
+    /* Reset Right Panel to be full container */
+    .right-panel {
+        width: 100% !important;
+        flex: none;             /* Remove flex ratio */
+        padding: 40px 30px;     /* Symmetrical Padding */
+        box-sizing: border-box; /* Includes padding in width calculation */
+        display: block;         /* Simple block layout */
+    }
+
+    /* Ensure inner box is centered */
+    .auth-box {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;        /* Let parent padding control width */
+    }
+}
