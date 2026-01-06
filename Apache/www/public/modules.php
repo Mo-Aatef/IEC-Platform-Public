@@ -36,24 +36,34 @@ while ($row = $result->fetch_assoc()) {
     <header class="top-header">
         <div class="header-welcome"><h2>Modules</h2></div>
         
-        <button id="sidebarToggle" class="mobile-menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        <div style="display:flex; align-items:center; gap:16px;">
+            <button class="notif-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></button>
+        </div>
     </header>
 
     <div class="content-body">
         <div class="section-header" style="flex-wrap: wrap; gap: 16px;">
             <h3 class="section-title">All Weeks Overview</h3>
+            <?php if (!empty($modules)): ?>
             <div class="legend" style="flex-wrap: wrap;">
                 <div class="legend-item"><span class="dot dot-green"></span> Completed</div>
                 <div class="legend-item"><span class="dot dot-amber"></span> In Progress</div>
                 <div class="legend-item"><span class="dot dot-gray"></span> Locked</div>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="modules-grid">
             <?php if (empty($modules)): ?>
-                <p style="color:#6b7280;">No modules found.</p>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px solid #e5e7eb;">
+                    <div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <i class="fa-solid fa-layer-group" style="font-size: 24px; color: #9ca3af;"></i>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; color: #374151; margin-bottom: 8px;">No Modules Found</h3>
+                    <p style="color: #6b7280; font-size: 14px; max-width: 400px; margin: 0 auto;">
+                        Your curriculum is currently being built. Please check back later or contact your tutor.
+                    </p>
+                </div>
             <?php else: ?>
                 <?php foreach ($modules as $mod): ?>
                     <?php 

@@ -3,28 +3,39 @@
 $page_title = "Dashboard - IEC Platform";
 require_once 'student-header.php'; 
 
-// Include the logic file
+// Include logic
 require_once __DIR__ . '/../app/leaderboard-logic.php'; 
 
 $user_id = $_SESSION['user_id'];
 $group_id = $_SESSION['group_id'] ?? null; 
 
 // =================================================================================
-// 1. THE TWO TRUTHS LOGIC
+// 1. ROBUST "TWO TRUTHS" LOGIC (Handles Empty DB)
 // =================================================================================
 
+// A. ADMIN TRUTH
 $sql_admin = "SELECT m.module_number, m.id as mod_id, m.title as mod_title, 
                      l.day_number, l.id as lesson_id, l.title as lesson_title
               FROM modules m 
               JOIN lessons l ON m.id = l.module_id 
               WHERE m.is_global_locked = 0 AND l.is_unlocked = 1 
               ORDER BY m.module_number DESC, l.day_number DESC LIMIT 1";
-$admin_pace = $conn->query($sql_admin)->fetch_assoc();
+$admin_res = $conn->query($sql_admin);
+$admin_pace = ($admin_res && $admin_res->num_rows > 0) ? $admin_res->fetch_assoc() : null;
 
+// FALLBACK: If DB is empty, set default values
 if (!$admin_pace) {
-    $admin_pace = ['module_number' => 1, 'day_number' => 1, 'mod_title' => 'Welcome', 'lesson_title' => 'Course Start', 'lesson_id' => 0];
+    $admin_pace = [
+        'module_number' => 1, 
+        'day_number' => 1, 
+        'mod_title' => 'Welcome', 
+        'lesson_title' => 'Program Starting Soon', 
+        'lesson_id' => 0,
+        'mod_id' => 0
+    ];
 }
 
+// B. STUDENT TRUTH
 $sql_student = "SELECT m.module_number, l.day_number, l.id as lesson_id, l.title
                 FROM lessons l
                 JOIN modules m ON l.module_id = m.id
@@ -32,8 +43,10 @@ $sql_student = "SELECT m.module_number, l.day_number, l.id as lesson_id, l.title
                      ON l.id = slp.lesson_id AND slp.student_id = $user_id
                 WHERE (slp.status IS NULL OR slp.status != 'completed')
                 ORDER BY m.module_number ASC, l.day_number ASC LIMIT 1";
-$student_cursor = $conn->query($sql_student)->fetch_assoc();
+$student_res = $conn->query($sql_student);
+$student_cursor = ($student_res && $student_res->num_rows > 0) ? $student_res->fetch_assoc() : null;
 
+// C. CALCULATE DELTA
 $a_score = ($admin_pace['module_number'] * 100) + $admin_pace['day_number'];
 
 if ($student_cursor) {
@@ -42,12 +55,14 @@ if ($student_cursor) {
     $s_label = "Day " . $student_cursor['day_number'];
     $s_title = $student_cursor['title'];
 } else {
+    // If no lessons assigned or all done
     $s_score = 9999; 
     $s_lesson_id = 0;
     $s_label = "Complete";
     $s_title = "All caught up!";
 }
 
+// D. DETERMINE UI STATE
 $admin_truth_text = "Week " . $admin_pace['module_number'] . " · Day " . $admin_pace['day_number'];
 
 $state_class = "on-track"; 
@@ -56,22 +71,35 @@ $sub_text = "";
 $btn_text = "";
 $btn_link = "#";
 $btn_icon = "fa-play";
+$btn_disabled = false;
 
-if ($s_score < $a_score) {
+// SAFEGUARD: If no lessons exist in DB at all (ID is 0)
+if ($admin_pace['lesson_id'] == 0 && $s_lesson_id == 0) {
+    $state_class = "ready";
+    $headline_text = "Welcome to IEC";
+    $sub_text = "Curriculum is currently being updated.";
+    $btn_text = "No Lessons Yet";
+    $btn_disabled = true; // Prevents clicking
+} 
+elseif ($s_score < $a_score) {
+    // BEHIND
     $state_class = "behind";
     $headline_text = "You are currently on " . $s_label;
     $sub_text = $s_title;
     $btn_text = "Continue " . $s_label;
     $btn_link = "view-lesson.php?id=" . $s_lesson_id;
-    $btn_icon = "fa-play";
-} elseif ($s_score == $a_score) {
+} 
+elseif ($s_score == $a_score) {
+    // ON TRACK
     $state_class = "ready";
     $headline_text = "Ready for today's session";
     $sub_text = $admin_pace['lesson_title'];
     $btn_text = "Start " . $s_label;
     $btn_link = "view-lesson.php?id=" . $admin_pace['lesson_id'];
     $btn_icon = "fa-rocket";
-} else {
+} 
+else {
+    // DONE
     $state_class = "done";
     $headline_text = "You are up to date! 🎉";
     $sub_text = "Great job keeping up with the pace.";
@@ -81,11 +109,13 @@ if ($s_score < $a_score) {
     $btn_style = "background:rgba(255,255,255,0.2); color:white; border:1px solid rgba(255,255,255,0.4);"; 
 }
 
+// Leaderboard Logic (Safe Handling)
 $leaderboard_data = [];
 if ($admin_pace['mod_id'] > 0) {
     $leaderboard_data = getWeeklyLeaderboard($conn, $admin_pace['mod_id']);
 }
 
+// Announcements (Safe Handling)
 if (empty($group_id)) {
     $ann_query = "SELECT * FROM announcements WHERE group_id IS NULL ORDER BY created_at DESC LIMIT 3";
     $stmt = $conn->prepare($ann_query);
@@ -103,9 +133,10 @@ $announcements = $stmt->get_result();
             <h2>Welcome back, <?php echo htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]); ?>!</h2>
             <p>Here is your personalized focus for today.</p>
         </div>
-        <button id="sidebarToggle" class="mobile-menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        
+        <div style="display:flex; align-items:center; gap:16px;">
+            <button class="notif-btn"><i class="fa-regular fa-bell"></i><span class="notif-dot"></span></button>
+        </div>
     </header>
 
     <div class="content-body">
@@ -128,9 +159,15 @@ $announcements = $stmt->get_result();
             <h1 class="hero-title"><?php echo $headline_text; ?></h1>
             <p class="hero-sub"><?php echo htmlspecialchars($sub_text); ?></p>
             
+            <?php if(!$btn_disabled): ?>
             <a href="<?php echo $btn_link; ?>" class="btn-hero" style="<?php echo isset($btn_style) ? $btn_style : ''; ?>">
                 <i class="fa-solid <?php echo $btn_icon; ?>"></i> <?php echo $btn_text; ?>
             </a>
+            <?php else: ?>
+            <div class="btn-hero" style="background:rgba(255,255,255,0.5); cursor:not-allowed;">
+                <i class="fa-solid fa-ban"></i> <?php echo $btn_text; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <div class="dashboard-bottom">
@@ -179,7 +216,7 @@ $announcements = $stmt->get_result();
                 <div class="content-card">
                     <div class="card-header"><h3 class="card-title">Recent Announcements</h3></div>
                     <div class="announcement-list">
-                        <?php if ($announcements->num_rows > 0): ?>
+                        <?php if ($announcements && $announcements->num_rows > 0): ?>
                             <?php while($ann = $announcements->fetch_assoc()): ?>
                                 <div class="ann-item">
                                     <div class="ann-date"><span><?php echo date('M', strtotime($ann['created_at'])); ?></span><span><?php echo date('d', strtotime($ann['created_at'])); ?></span></div>
@@ -190,8 +227,8 @@ $announcements = $stmt->get_result();
                                 </div>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <div style="text-align:center; padding:20px; color:#9ca3af;">
-                                <i class="fa-regular fa-folder-open" style="font-size:24px; margin-bottom:8px;"></i>
+                            <div style="text-align:center; padding:40px 20px; color:#9ca3af;">
+                                <i class="fa-regular fa-folder-open" style="font-size:32px; margin-bottom:12px; opacity:0.5;"></i>
                                 <p style="font-size:13px;">No announcements yet.</p>
                             </div>
                         <?php endif; ?>

@@ -1,15 +1,24 @@
 <?php
 // admin/users.php
-require_once 'header.php';
 
-// --- 1. INITIALIZE VARIABLES ---
+// 1. INCLUDE AUTH & CONFIG MANUALLY FIRST
+// We need the database connection ($conn) and session to process forms 
+// BEFORE we output any HTML.
+require_once '../app/auth.php';
+requireRole('admin');
+
+// --- 2. INITIALIZE VARIABLES ---
 $msg = "";
 $edit_mode = false;
 $edit_data = ['name' => '', 'email' => '', 'group_id' => '', 'id' => ''];
 $filter_role = isset($_GET['role']) ? $_GET['role'] : 'student';
-$current_user_id = $_SESSION['user_id']; // For self-protection checks
+$current_user_id = $_SESSION['user_id']; 
 
-// --- 2. HANDLE DELETE ACTION ---
+// =================================================================================
+//  LOGIC BLOCK: HANDLE ACTIONS (Must be before 'header.php')
+// =================================================================================
+
+// --- A. HANDLE DELETE ACTION ---
 if (isset($_GET['delete_id'])) {
     $did = (int)$_GET['delete_id'];
     
@@ -19,27 +28,20 @@ if (isset($_GET['delete_id'])) {
     } else {
         $conn->query("DELETE FROM users WHERE id=$did");
         $msg = "<div class='alert success'>User removed successfully.</div>";
+        // Optional: Redirect to clear the URL query
+        // header("Location: users.php?role=$filter_role&msg=deleted");
+        // exit;
     }
 }
 
-// --- 3. HANDLE EDIT/FETCH ACTION ---
-if (isset($_GET['edit_id'])) {
-    $eid = (int)$_GET['edit_id'];
-    $res = $conn->query("SELECT * FROM users WHERE id=$eid");
-    if ($res->num_rows > 0) {
-        $edit_mode = true;
-        $edit_data = $res->fetch_assoc();
-    }
-}
-
-// --- 4. HANDLE FORM SUBMISSION ---
+// --- B. HANDLE FORM SUBMISSION (Create / Update) ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $role = $_POST['role'];
     $group_id = !empty($_POST['group_id']) ? (int)$_POST['group_id'] : 'NULL';
     
-    // UPDATE USER
+    // 1. UPDATE USER
     if (isset($_POST['update_user'])) {
         $uid = (int)$_POST['user_id'];
         
@@ -53,17 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $sql = "UPDATE users SET name='$name', email='$email', role='$role' $group_sql_part $pass_sql WHERE id=$uid";
         
         if ($conn->query($sql)) {
+            // SUCCESS: Redirect immediately (Before HTML output)
             header("Location: users.php?role=$role&msg=updated");
             exit(); 
         } else {
             $msg = "<div class='alert error'>Error: " . $conn->error . "</div>";
         }
 
-    // CREATE NEW USER (Blocked for Admins via UI, but safe to keep logic for others)
+    // 2. CREATE NEW USER
     } elseif (isset($_POST['create_user'])) {
-        // Double check: If role is admin, strictly block creation logic if desired, 
-        // but removing the form is usually enough for this phase.
-        
         $password = $_POST['password'];
         $check = $conn->query("SELECT id FROM users WHERE email='$email'");
         
@@ -78,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             if ($conn->query($sql)) {
                 $msg = "<div class='alert success'>User <strong>$name</strong> created successfully!</div>";
+                // Optional: Redirect to avoid re-submission on refresh
             } else {
                 $msg = "<div class='alert error'>Database Error: " . $conn->error . "</div>";
             }
@@ -85,28 +86,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-if(isset($_GET['msg']) && $_GET['msg'] == 'updated') {
-    $msg = "<div class='alert success'>User updated successfully!</div>";
-}
-
-// --- 5. HANDLE STATUS TOGGLE ---
+// --- C. HANDLE STATUS TOGGLE ---
 if (isset($_GET['toggle_id'])) {
     $id = (int)$_GET['toggle_id'];
     
     // GUARDRAIL: Prevent Self-Deactivation
     if ($id == $current_user_id) {
-        // We just redirect back without doing anything.
-        // The button shouldn't exist, but this protects against URL hacking.
         header("Location: users.php?role=$filter_role&msg=self_lockout_prevented");
         exit();
     }
 
     $conn->query("UPDATE users SET status = IF(status='active', 'inactive', 'active') WHERE id=$id");
+    
+    // SUCCESS: Redirect immediately
     header("Location: users.php?role=$filter_role");
     exit();
 }
 
-// --- 6. FETCH TABLE DATA ---
+// =================================================================================
+//  VIEW BLOCK: NOW WE CAN OUTPUT HTML
+// =================================================================================
+
+// 3. START THE VIEW
+// This file outputs the HTML <head>, Sidebar, etc.
+require_once 'header.php'; 
+
+// --- D. HANDLE FETCH DATA (For Edit Form & Table) ---
+// This doesn't redirect, so it's safe to do here or above.
+
+// 1. Check for success message in URL
+if(isset($_GET['msg']) && $_GET['msg'] == 'updated') {
+    $msg = "<div class='alert success'>User updated successfully!</div>";
+}
+
+// 2. Fetch User for Editing
+if (isset($_GET['edit_id'])) {
+    $eid = (int)$_GET['edit_id'];
+    $res = $conn->query("SELECT * FROM users WHERE id=$eid");
+    if ($res->num_rows > 0) {
+        $edit_mode = true;
+        $edit_data = $res->fetch_assoc();
+    }
+}
+
+// 3. Fetch Table List
 $sort_logic = "ORDER BY (u.id = $current_user_id) DESC, u.id DESC"; // Put ME first, then new users
 
 if ($filter_role == 'tutor') {
@@ -124,6 +147,7 @@ if ($filter_role == 'tutor') {
 }
 $result = $conn->query($sql);
 
+// 4. Fetch Groups for Dropdown
 $groups_list = $conn->query("SELECT id, name FROM groups ORDER BY id DESC");
 $groups_options = [];
 while($g = $groups_list->fetch_assoc()) { $groups_options[] = $g; }
@@ -299,7 +323,6 @@ while($g = $groups_list->fetch_assoc()) { $groups_options[] = $g; }
     </div>
 </div>
 
-<?php ?>
 </div> 
 </main>
 </div>

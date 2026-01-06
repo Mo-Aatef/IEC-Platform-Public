@@ -2,14 +2,37 @@
 // admin/lesson-editor.php
 require_once 'header.php';
 
-// 1. GET LESSON ID
+// 1. GET INPUTS
 $lesson_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$module_id = isset($_GET['module_id']) ? (int)$_GET['module_id'] : 0;
+$day_num   = isset($_GET['day']) ? (int)$_GET['day'] : 0;
+
+// 2. HANDLE AUTO-CREATION (If coming from Week Detail "Create" button)
+if ($lesson_id === 0 && $module_id > 0 && $day_num > 0) {
+    // A. Check if it actually exists (prevent duplicates)
+    $check = $conn->query("SELECT id FROM lessons WHERE module_id=$module_id AND day_number=$day_num");
+    if ($check->num_rows > 0) {
+        $lesson_id = $check->fetch_assoc()['id'];
+    } else {
+        // B. Create Placeholder
+        $def_title = "Day $day_num Lesson";
+        $stmt = $conn->prepare("INSERT INTO lessons (module_id, day_number, title, description, is_unlocked) VALUES (?, ?, ?, '', 0)");
+        $stmt->bind_param("iis", $module_id, $day_num, $def_title);
+        if ($stmt->execute()) {
+            $lesson_id = $stmt->insert_id;
+        } else {
+            die("Error creating lesson: " . $conn->error);
+        }
+    }
+}
+
+// 3. FINAL VALIDATION
 if ($lesson_id === 0) {
-    echo "<script>window.location.href='modules.php';</script>";
+    echo "<script>alert('Invalid Request'); window.location.href='modules.php';</script>";
     exit;
 }
 
-// 2. FETCH LESSON & MODULE INFO
+// 4. FETCH LESSON & MODULE INFO
 $sql = "SELECT l.*, m.title as module_title, m.module_number 
         FROM lessons l 
         JOIN modules m ON l.module_id = m.id 
@@ -17,7 +40,7 @@ $sql = "SELECT l.*, m.title as module_title, m.module_number
 $lesson = $conn->query($sql)->fetch_assoc();
 if (!$lesson) die("Lesson not found.");
 
-// 3. HANDLE SAVE
+// 5. HANDLE SAVE (Standard Update Logic)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // A. Update Lesson Details
     $l_title = $conn->real_escape_string($_POST['title']);
@@ -86,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// 4. FETCH EXISTING STEPS
+// 6. FETCH EXISTING STEPS FOR DISPLAY
 $steps = [];
 $res = $conn->query("SELECT * FROM module_steps WHERE lesson_id = $lesson_id ORDER BY step_order ASC");
 while($row = $res->fetch_assoc()) {

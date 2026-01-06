@@ -39,90 +39,17 @@ foreach($lessons as $l) {
     if(($l['user_status'] ?? '') === 'completed') $completed_days++;
 }
 $total_days = 6; 
-$weekly_percent = round(($completed_days / $total_days) * 100);
+$weekly_percent = ($total_days > 0) ? round(($completed_days / $total_days) * 100) : 0;
 
 // 4. Offline Info
 $off_sql = "SELECT * FROM offline_sessions WHERE module_id = $module_id";
 $res_off = $conn->query($off_sql);
-$offline = ($res_off->num_rows > 0) ? $res_off->fetch_assoc() : null;
+$offline = ($res_off && $res_off->num_rows > 0) ? $res_off->fetch_assoc() : null;
 
 $previous_completed = true; 
 ?>
 
 <link rel="stylesheet" href="../assets/css/student/daily-lessons.css">
-
-<style>
-@media (max-width: 900px) {
-    .page-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important; /* CRITICAL: Prevents button from dropping down */
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px;
-        gap: 12px;
-        height: auto;
-        min-height: 80px;
-    }
-
-    /* Left side takes available space but shrinks if needed */
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;          /* Grow to fill space */
-        min-width: 0;     /* CRITICAL: Allows text truncation to work inside flex */
-        width: auto;      /* Override any 100% width settings */
-    }
-
-    .back-btn {
-        flex-shrink: 0;   /* Don't squash the arrow button */
-    }
-
-    .header-title {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-width: 0;     /* Required for text-overflow to work */
-    }
-
-    .header-title h2 { 
-        font-size: 16px; 
-        line-height: 1.3;
-        margin: 0;
-        white-space: nowrap;      /* Force single line */
-        overflow: hidden;         /* Hide overflow */
-        text-overflow: ellipsis;  /* Add ... at end */
-    }
-    
-    .header-title p {
-        font-size: 12px;
-        color: #6b7280;
-        margin: 2px 0 0 0;
-        white-space: nowrap;      /* Force single line */
-        overflow: hidden;
-        text-overflow: ellipsis;  /* Add ... at end */
-    }
-
-    /* The Hamburger Button */
-    .mobile-menu-btn {
-        display: flex !important;
-        flex-shrink: 0;    /* NEVER allow this button to shrink */
-        width: 40px;
-        height: 40px;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: white;
-        margin: 0;         /* Remove margins that might push it */
-    }
-    
-    /* Layout Adjustments for Content Below */
-    .progress-section { padding: 16px; margin-bottom: 24px; }
-    .lessons-grid { grid-template-columns: 1fr; }
-}
-</style>
 
 <main class="main-content">
     
@@ -136,10 +63,10 @@ $previous_completed = true;
                 <p><?php echo htmlspecialchars($module['description'] ?? 'Master your weekly topic'); ?></p>
             </div>
         </div>
-
-        <button id="sidebarToggle" class="mobile-menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        
+        <div style="display:flex; align-items:center; gap:16px;">
+            <button class="notif-btn"><i class="fa-regular fa-bell"></i></button>
+        </div>
     </header>
 
     <div class="content-wrapper">
@@ -162,86 +89,95 @@ $previous_completed = true;
 
         <div class="section-header">
             <h3 class="section-title">Daily Modules</h3>
-            <div class="legend" style="display:none;"> <div class="legend-item"><div class="dot dot-green"></div> Completed</div>
+            <div class="legend" style="display:none;"> 
+                <div class="legend-item"><div class="dot dot-green"></div> Completed</div>
                 <div class="legend-item"><div class="dot dot-amber"></div> Active</div>
             </div>
         </div>
 
         <div class="lessons-grid">
-            <?php foreach ($lessons as $lesson): 
-                $admin_unlocked = (int)($lesson['is_unlocked'] ?? 0); 
-                $user_finished = (($lesson['user_status'] ?? '') == 'completed');
-                
-                $status = 'locked';
-                $card_class = 'card-locked';
-                $badge_text = 'LOCKED';
-                $icon_class = 'fa-lock';
-                $footer_text = 'Locked';
-
-                if ($user_finished) {
-                    $status = 'completed';
-                    $card_class = 'card-completed';
-                    $badge_text = 'COMPLETED';
-                    $icon_class = 'fa-check';
-                    $previous_completed = true; 
-                } elseif (!$admin_unlocked) {
+            <?php if(empty($lessons)): ?>
+                <div style="grid-column: 1 / -1; background: white; padding: 40px; border-radius: 12px; text-align: center; border: 1px solid #e5e7eb;">
+                    <div style="font-size: 40px; color: #cbd5e1; margin-bottom: 16px;"><i class="fa-solid fa-book-open"></i></div>
+                    <h3 style="color: #374151; font-weight: 700; margin-bottom: 8px;">Content Coming Soon</h3>
+                    <p style="color: #6b7280; font-size: 14px;">The lessons for this week have not been uploaded yet.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($lessons as $lesson): 
+                    $admin_unlocked = (int)($lesson['is_unlocked'] ?? 0); 
+                    $user_finished = (($lesson['user_status'] ?? '') == 'completed');
+                    
                     $status = 'locked';
                     $card_class = 'card-locked';
                     $badge_text = 'LOCKED';
                     $icon_class = 'fa-lock';
-                    $footer_text = 'Instructor has not opened this yet';
-                    $previous_completed = false; 
-                } elseif ($previous_completed) {
-                    $status = 'active';
-                    $card_class = 'card-active';
-                    $badge_text = 'IN PROGRESS';
-                    $icon_class = 'fa-play';
-                    $previous_completed = false; 
-                } else {
-                    $status = 'locked';
-                    $card_class = 'card-locked';
-                    $badge_text = 'LOCKED';
-                    $icon_class = 'fa-lock';
-                    $footer_text = 'Complete Day ' . ($lesson['day_number']-1) . ' to unlock';
-                    $previous_completed = false;
-                }
-                $link = ($status == 'locked') ? '#' : "view-lesson.php?id=" . $lesson['id'];
-            ?>
+                    $footer_text = 'Locked';
 
-            <a href="<?php echo $link; ?>" class="lesson-card <?php echo $card_class; ?>">
-                <div class="lc-header">
-                    <div class="lc-meta">
-                        <div class="lc-badge-row">
-                            <p class="lc-day">DAY <?php echo $lesson['day_number']; ?></p>
-                            <span class="status-badge"><?php echo $badge_text; ?></span>
+                    if ($user_finished) {
+                        $status = 'completed';
+                        $card_class = 'card-completed';
+                        $badge_text = 'COMPLETED';
+                        $icon_class = 'fa-check';
+                        $previous_completed = true; 
+                    } elseif (!$admin_unlocked) {
+                        $status = 'locked';
+                        $card_class = 'card-locked';
+                        $badge_text = 'LOCKED';
+                        $icon_class = 'fa-lock';
+                        $footer_text = 'Instructor has not opened this yet';
+                        $previous_completed = false; 
+                    } elseif ($previous_completed) {
+                        $status = 'active';
+                        $card_class = 'card-active';
+                        $badge_text = 'IN PROGRESS';
+                        $icon_class = 'fa-play';
+                        $previous_completed = false; 
+                    } else {
+                        $status = 'locked';
+                        $card_class = 'card-locked';
+                        $badge_text = 'LOCKED';
+                        $icon_class = 'fa-lock';
+                        $footer_text = 'Complete Day ' . ($lesson['day_number']-1) . ' to unlock';
+                        $previous_completed = false;
+                    }
+                    $link = ($status == 'locked') ? '#' : "view-lesson.php?id=" . $lesson['id'];
+                ?>
+
+                <a href="<?php echo $link; ?>" class="lesson-card <?php echo $card_class; ?>">
+                    <div class="lc-header">
+                        <div class="lc-meta">
+                            <div class="lc-badge-row">
+                                <p class="lc-day">DAY <?php echo $lesson['day_number']; ?></p>
+                                <span class="status-badge"><?php echo $badge_text; ?></span>
+                            </div>
+                            <h4 class="lc-title"><?php echo htmlspecialchars($lesson['title']); ?></h4>
                         </div>
-                        <h4 class="lc-title"><?php echo htmlspecialchars($lesson['title']); ?></h4>
+                        <div class="lc-icon"><i class="fa-solid <?php echo $icon_class; ?>"></i></div>
                     </div>
-                    <div class="lc-icon"><i class="fa-solid <?php echo $icon_class; ?>"></i></div>
-                </div>
 
-                <p class="lc-desc"><?php echo htmlspecialchars($lesson['description']); ?></p>
+                    <p class="lc-desc"><?php echo htmlspecialchars($lesson['description']); ?></p>
 
-                <div class="lc-footer">
-                    <?php if ($status == 'completed'): ?>
-                        <span class="lc-score">Score: 100%</span>
-                        <div class="action-link">Review <i class="fa-solid fa-arrow-right"></i></div>
-                    <?php elseif ($status == 'active'): ?>
-                        <div class="progress-mini-wrapper">
-                            <div class="pm-labels"><span>Progress</span><span>0%</span></div>
-                            <div class="pm-track"><div class="pm-fill" style="width: 5%;"></div></div>
-                        </div>
-                        <div class="action-link" style="color:#4f46e5;">Continue <i class="fa-solid fa-arrow-right"></i></div>
-                    <?php else: ?>
-                        <span class="footer-text" style="font-size:12px; opacity:0.7;">
-                            <i class="fa-solid fa-lock" style="font-size:10px;"></i> <?php echo $footer_text; ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
-            </a>
-            <?php endforeach; ?>
+                    <div class="lc-footer">
+                        <?php if ($status == 'completed'): ?>
+                            <span class="lc-score">Score: 100%</span>
+                            <div class="action-link">Review <i class="fa-solid fa-arrow-right"></i></div>
+                        <?php elseif ($status == 'active'): ?>
+                            <div class="progress-mini-wrapper">
+                                <div class="pm-labels"><span>Progress</span><span>0%</span></div>
+                                <div class="pm-track"><div class="pm-fill" style="width: 5%;"></div></div>
+                            </div>
+                            <div class="action-link" style="color:#4f46e5;">Continue <i class="fa-solid fa-arrow-right"></i></div>
+                        <?php else: ?>
+                            <span class="footer-text" style="font-size:12px; opacity:0.7;">
+                                <i class="fa-solid fa-lock" style="font-size:10px;"></i> <?php echo $footer_text; ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
 
-            <?php if (!empty($group_id)): ?>
+            <?php if (!empty($group_id) && $offline): ?>
             <div class="lesson-card card-offline">
                 <div class="lc-header">
                     <div class="lc-meta">

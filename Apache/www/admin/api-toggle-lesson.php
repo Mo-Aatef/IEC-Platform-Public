@@ -2,7 +2,6 @@
 // admin/api-toggle-lesson.php
 
 // 1. SILENCE OUTPUT (Crucial for APIs)
-// This prevents HTML warnings from breaking the JSON response
 error_reporting(E_ALL);
 ini_set('display_errors', 0); 
 
@@ -10,9 +9,9 @@ header('Content-Type: application/json');
 
 // 2. DEFINE PATHS (Robust check)
 $paths = [
-    __DIR__ . '/../app/config.php',  // Standard structure
-    __DIR__ . '/../../app/config.php', // Deeper structure
-    $_SERVER['DOCUMENT_ROOT'] . '/app/config.php' // Absolute path
+    __DIR__ . '/../app/config.php',
+    __DIR__ . '/../../app/config.php',
+    $_SERVER['DOCUMENT_ROOT'] . '/app/config.php'
 ];
 
 $config_loaded = false;
@@ -30,28 +29,25 @@ if (!$config_loaded) {
     exit;
 }
 
-// 3. LOAD AUTH (If exists)
-// We use a try-catch style logic for require to avoid fatal crashes
+// 3. LOAD AUTH
 $auth_path = __DIR__ . '/../app/auth.php';
 if (file_exists($auth_path)) {
     require_once $auth_path;
-    // Check role if the function exists
     if (function_exists('requireRole')) {
         requireRole('admin');
     }
 }
 
-// 4. CHECK DATABASE CONNECTION
+// 4. CHECK DB
 if (!isset($conn) || !$conn) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database Error: $conn variable is missing.']);
+    echo json_encode(['success' => false, 'message' => 'Database Error: Connection missing.']);
     exit;
 }
 
 // 5. GET INPUT
 $input = json_decode(file_get_contents('php://input'), true);
 $lesson_id = isset($input['lesson_id']) ? (int)$input['lesson_id'] : 0;
-// Note: We use isset for state because 0 is a valid value (Locked)
 $state = isset($input['state']) ? (int)$input['state'] : 0; 
 
 if (!$lesson_id) {
@@ -59,21 +55,34 @@ if (!$lesson_id) {
     exit;
 }
 
+// =========================================================
+// SECURITY CHECK: THE GATEKEEPER
+// =========================================================
+if ($state === 1) { // If trying to UNLOCK
+    // Count real steps in DB
+    $check = $conn->query("SELECT COUNT(*) as cnt FROM module_steps WHERE lesson_id = $lesson_id");
+    $row = $check->fetch_assoc();
+    
+    if ($row['cnt'] == 0) {
+        echo json_encode([
+            'success' => false, 
+            'message' => '🚫 BLOCK: This lesson is empty. You must add content (Edit) before you can unlock it.'
+        ]);
+        exit;
+    }
+}
+
 // 6. UPDATE DATABASE
 try {
     $stmt = $conn->prepare("UPDATE lessons SET is_unlocked = ? WHERE id = ?");
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
-    }
     $stmt->bind_param("ii", $state, $lesson_id);
-
+    
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);
     } else {
-        throw new Exception("Execute failed: " . $stmt->error);
+        throw new Exception($stmt->error);
     }
 } catch (Exception $e) {
-    http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
